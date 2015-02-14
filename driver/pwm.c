@@ -304,13 +304,13 @@ pwm_get_freq(uint8 channel)
  * Parameters   : NONE
  * Returns      : NONE
 *******************************************************************************/
-LOCAL void ICACHE_RAM_ATTR
+LOCAL void
 pwm_tim1_intr_handler(void)
 {
     uint8 local_toggle = pwm_toggle;                        // pwm_toggle may change outside
     RTC_CLR_REG_MASK(FRC1_INT_ADDRESS, FRC1_INT_CLR_MASK);
 
-    if (pwm_current_channel >= (*pwm_channel - 1)) {        // *pwm_channel may change outside
+   if (pwm_current_channel >= (*pwm_channel - 1)) {        // *pwm_channel may change outside
         pwm_single = pwm_single_toggle[local_toggle];
         pwm_channel = &pwm_channel_toggle[local_toggle];
 
@@ -372,9 +372,9 @@ pwm_init(uint16 freq, uint16 *duty)
 
     pwm_start();
     
-    ETS_FRC_TIMER1_INTR_ATTACH(pwm_tim1_intr_handler, NULL);
+   ETS_FRC_TIMER1_INTR_ATTACH(pwm_tim1_intr_handler, NULL);
     TM1_EDGE_INT_ENABLE();
-    ETS_FRC1_INTR_ENABLE();
+   ETS_FRC1_INTR_ENABLE();
 }
 
 bool ICACHE_FLASH_ATTR

@@ -74,14 +74,14 @@ int analogRead() {
 void analogWrite(uint8_t pin, int value) {
 	if(!pwm_exist(pin)) {
 		if(pwm_add(pin)) {
-			pwm_set_freq(100,0);
+			pwm_set_freq(1000,0);
 			pwm_start();
 		} else {
-			ets_uart_printf("pwm fail\n");
+			//ets_uart_printf("pwm fail\n");
 
 		}
 	} else {
-		ets_uart_printf("pwm ok\n");
+		//ets_uart_printf("pwm ok\n");
 	}
 	pwm_set_duty(value, pin);
 	pwm_start();

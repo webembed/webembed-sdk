@@ -9,7 +9,7 @@
 #include <vector>
 #include "routines.h"
 #include "gpioctl.h"
-#define DELAY 500 /* milliseconds */
+#define DELAY 50 /* milliseconds */
 
 // =============================================================================================
 // C includes and declarations
@@ -87,7 +87,7 @@ LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 {
 	static int counter = 0;
 	ets_uart_printf("Hello World #%d val=%d!\r\n", counter++, value);
-	analogWrite(4,value);
+	analogWrite(2,value);
 	value = (value + 10) % 1024;
 }
 
@@ -98,8 +98,8 @@ extern "C" void user_init(void)
 {
 	do_global_ctors();
 	pinMode(0,INPUT_PULLUP);
-	pinMode(4,OUTPUT);
-	digitalWrite(4, HIGH);
+	pinMode(2,OUTPUT);
+	digitalWrite(2, HIGH);
 	value = 0;
 	// Configure the UART
 	uart_init(BIT_RATE_115200, BIT_RATE_115200);
@@ -111,7 +111,7 @@ extern "C" void user_init(void)
 	os_timer_setfn(&hello_timer, (os_timer_func_t *)hello_cb, (void *)0);
 	// void os_timer_arm(ETSTimer *ptimer,uint32_t milliseconds, bool repeat_flag)
 	os_timer_arm(&hello_timer, DELAY, 1);
-	pwm_init(100,0);
+	pwm_init(1000,0);
 
 
 }
