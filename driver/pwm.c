@@ -8,7 +8,6 @@
  * Modification history:
  *     2014/5/1, v1.0 create this file.
 *******************************************************************************/
-#include "platform.h"
 
 #include "ets_sys.h"
 #include "os_type.h"
@@ -17,7 +16,7 @@
 
 #include "user_interface.h"
 #include "driver/pwm.h"
-
+#include "pin_map.h"
 // #define PWM_DBG os_printf
 #define PWM_DBG
 
@@ -120,7 +119,7 @@ pwm_start(void)
         local_single[i].h_time = US_TO_RTC_TIMER_TICKS(us);
         PWM_DBG("i:%d us:%d ht:%d\n",i,us,local_single[i].h_time);
         local_single[i].gpio_set = 0;
-        local_single[i].gpio_clear = 1 << pin_num[pwm_out_io_num[i]];
+        local_single[i].gpio_clear = 1 << pwm_out_io_num[i];
     }
 
     local_single[pwm_channel_num].h_time = US_TO_RTC_TIMER_TICKS(pwm.period);
@@ -380,6 +379,7 @@ pwm_init(uint16 freq, uint16 *duty)
 
 bool ICACHE_FLASH_ATTR
 pwm_add(uint8 channel){
+	if(pin_mux[channel] == UNDEFINED_PIN) return false;
     PWM_DBG("--Function pwm_add() is called. channel:%d\n", channel);
     PWM_DBG("pwm_gpio:%x,pwm_channel_num:%d\n",pwm_gpio,pwm_channel_num);
     PWM_DBG("pwm_out_io_num[0]:%d,[1]:%d,[2]:%d\n",pwm_out_io_num[0],pwm_out_io_num[1],pwm_out_io_num[2]);
@@ -392,9 +392,9 @@ pwm_add(uint8 channel){
             LOCK_PWM(critical);   // enter critical
             pwm_out_io_num[i] = channel;
             pwm.duty[i] = 0;
-            pwm_gpio |= (1 << pin_num[channel]);
+            pwm_gpio |= (1 << channel);
             PIN_FUNC_SELECT(pin_mux[channel], pin_func[channel]);
-            GPIO_REG_WRITE(GPIO_PIN_ADDR(GPIO_ID_PIN(pin_num[channel])), GPIO_REG_READ(GPIO_PIN_ADDR(GPIO_ID_PIN(pin_num[channel]))) & (~ GPIO_PIN_PAD_DRIVER_SET(GPIO_PAD_DRIVER_ENABLE))); //disable open drain;
+            GPIO_REG_WRITE(GPIO_PIN_ADDR(GPIO_ID_PIN(channel)), GPIO_REG_READ(GPIO_PIN_ADDR(GPIO_ID_PIN(channel))) & (~ GPIO_PIN_PAD_DRIVER_SET(GPIO_PAD_DRIVER_ENABLE))); //disable open drain;
             pwm_channel_num++;
             UNLOCK_PWM(critical);   // leave critical
             return true;
@@ -405,6 +405,7 @@ pwm_add(uint8 channel){
 
 bool ICACHE_FLASH_ATTR
 pwm_delete(uint8 channel){
+	if(pin_mux[channel] == UNDEFINED_PIN) return false;
     PWM_DBG("--Function pwm_delete() is called. channel:%d\n", channel);
     PWM_DBG("pwm_gpio:%x,pwm_channel_num:%d\n",pwm_gpio,pwm_channel_num);
     PWM_DBG("pwm_out_io_num[0]:%d,[1]:%d,[2]:%d\n",pwm_out_io_num[0],pwm_out_io_num[1],pwm_out_io_num[2]);
@@ -414,7 +415,7 @@ pwm_delete(uint8 channel){
         if(pwm_out_io_num[i]==channel){  // exist
             LOCK_PWM(critical);   // enter critical
             pwm_out_io_num[i] = -1;
-            pwm_gpio &= ~(1 << pin_num[channel]);   //clear the bit
+            pwm_gpio &= ~(1 << channel);   //clear the bit
             for(j=i;j<pwm_channel_num-1;j++){
                 pwm_out_io_num[j] = pwm_out_io_num[j+1];
                 pwm.duty[j] = pwm.duty[j+1];

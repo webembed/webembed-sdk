@@ -115,9 +115,11 @@ uint8 i2c_master_get_pinSCL(){
 void ICACHE_FLASH_ATTR
 i2c_master_gpio_init(uint8 sda, uint8 scl)
 {
-    pinSDA = pin_num[sda];
-    pinSCL = pin_num[scl];
+    if(pin_mux[sda] == UNDEFINED_PIN) return;
+    if(pin_mux[scl] == UNDEFINED_PIN) return;
 
+    pinSDA = sda;
+    pinSCL = scl;
     ETS_GPIO_INTR_DISABLE() ;
 //    ETS_INTR_LOCK();
 
