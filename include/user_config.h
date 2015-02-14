@@ -12,7 +12,7 @@
 
 #define USE_OPTIMIZE_PRINTF
 
-//#ifdef DEVELOP_VERSION
+#ifdef DEVELOP_VERSION
 #define NODE_DEBUG
 #endif	/* DEVELOP_VERSION */
 
@@ -35,7 +35,7 @@
 #define ICACHE_RAM_ATTR __attribute__((section(".iram0.text")))
 // #define ICACHE_RODATA_ATTR __attribute__((section(".rodata2.text")))
 
-#define GPIO_INTERRUPT_ENABLE
+//#define GPIO_INTERRUPT_ENABLE
 
 #define READLINE_INTERVAL	80
 #define KEY_SHORT_MS	200

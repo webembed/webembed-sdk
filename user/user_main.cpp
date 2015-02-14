@@ -19,7 +19,6 @@ extern "C"
 #include "driver/uart.h"
 
 
-
 // declare lib methods
 extern int ets_uart_printf(const char *fmt, ...);
 void ets_timer_disarm(ETSTimer *ptimer);
@@ -78,7 +77,7 @@ private:
 LOCAL os_timer_t hello_timer;
 
 
-
+bool pinState = false;
 
 // =============================================================================================
 // User code
@@ -88,6 +87,10 @@ LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 {
 	static int counter = 0;
 	ets_uart_printf("Hello World #%d!\r\n", counter++);
+	pinState = !pinState;
+
+
+
 }
 
 
@@ -96,6 +99,7 @@ A a;
 extern "C" void user_init(void)
 {
 	do_global_ctors();
+
 	// Configure the UART
 	uart_init(BIT_RATE_115200, BIT_RATE_115200);
 	a.print();

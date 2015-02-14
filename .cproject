@@ -50,12 +50,12 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="hello_world_cpp_2.null.1347473968" name="hello_world_cpp_2"/>
+		<project id="webembed-sdk.null.1347473968" name="webembed-sdk"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Default">
-			<resource resourceType="PROJECT" workspacePath="/hello_world_cpp_2"/>
+			<resource resourceType="PROJECT" workspacePath="/webembed-sdk"/>
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
