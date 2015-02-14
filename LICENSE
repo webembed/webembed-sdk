@@ -1,10 +1,7 @@
-  This repository contains code from multiple soruces, including the nodemcu firmware, ESP8266 SDK and Arduino/Wiring SDKs.
+  This repository contains code from multiple soruces, including the ESP8266 SDK and Arduino/Wiring SDKs.
   These will be licensed under multiple licenses, please see individual code files for details.
   
-  In particular:
-  
-  The nodemcu firmware is licensed under the MIT License
-  The Arduino libraries are licensed under the GNU LGPL
+  In particular the Arduino libraries are licensed under the GNU LGPL
   
   All my modifications are licensed under the same license as the original code, wherever possible.
   All original code is released to the public domain - see below:
