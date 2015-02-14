@@ -4,9 +4,9 @@
  * See LICENSE for details
  */
 
-#ifndef Arduino_h
+#ifndef GPIOCTL_h
 
-#define Arduino_h
+#define GPIOCTL_h
 #include <stdlib.h>
 #include <c_types.h>
 #ifdef __cplusplus
