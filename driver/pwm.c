@@ -379,7 +379,7 @@ pwm_init(uint16 freq, uint16 *duty)
 
 bool ICACHE_FLASH_ATTR
 pwm_add(uint8 channel){
-	if(pin_mux[channel] == UNDEFINED_PIN) return false;
+	if(!isValidPin(channel)) return false;
     PWM_DBG("--Function pwm_add() is called. channel:%d\n", channel);
     PWM_DBG("pwm_gpio:%x,pwm_channel_num:%d\n",pwm_gpio,pwm_channel_num);
     PWM_DBG("pwm_out_io_num[0]:%d,[1]:%d,[2]:%d\n",pwm_out_io_num[0],pwm_out_io_num[1],pwm_out_io_num[2]);
@@ -405,7 +405,7 @@ pwm_add(uint8 channel){
 
 bool ICACHE_FLASH_ATTR
 pwm_delete(uint8 channel){
-	if(pin_mux[channel] == UNDEFINED_PIN) return false;
+	if(!isValidPin(channel)) return false;
     PWM_DBG("--Function pwm_delete() is called. channel:%d\n", channel);
     PWM_DBG("pwm_gpio:%x,pwm_channel_num:%d\n",pwm_gpio,pwm_channel_num);
     PWM_DBG("pwm_out_io_num[0]:%d,[1]:%d,[2]:%d\n",pwm_out_io_num[0],pwm_out_io_num[1],pwm_out_io_num[2]);

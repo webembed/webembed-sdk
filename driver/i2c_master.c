@@ -115,8 +115,8 @@ uint8 i2c_master_get_pinSCL(){
 void ICACHE_FLASH_ATTR
 i2c_master_gpio_init(uint8 sda, uint8 scl)
 {
-    if(pin_mux[sda] == UNDEFINED_PIN) return;
-    if(pin_mux[scl] == UNDEFINED_PIN) return;
+    if(!isValidPin(sda)) return;
+    if(!isValidPin(scl)) return;
 
     pinSDA = sda;
     pinSCL = scl;

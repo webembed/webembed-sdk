@@ -55,3 +55,11 @@ GPIO_INT_TYPE pin_int_type[GPIO_PIN_NUM] = {
 								GPIO_PIN_INTR_DISABLE};
 #endif
 #endif
+
+bool isValidPin(uint8_t pin) {
+	if(pin > GPIO_PIN_NUM)
+		return false;
+	if(pin_mux[pin] == UNDEFINED_PIN)
+		return false;
+	return true;
+}

@@ -5,6 +5,7 @@
 #include "c_types.h"
 #include "user_config.h"
 #include "gpio.h"
+#include "ets_sys.h"
 
 #define GPIO_PIN_NUM 17
 
@@ -16,4 +17,7 @@ extern uint32_t pin_mux[GPIO_PIN_NUM];
 #ifdef GPIO_INTERRUPT_ENABLE
 extern GPIO_INT_TYPE pin_int_type[GPIO_PIN_NUM];
 #endif
+
+bool isValidPin(uint8_t pin);
+
 #endif // #ifndef __PIN_MAP_H__
