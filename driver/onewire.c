@@ -60,9 +60,7 @@ sample code bearing this copyright.
 #include "pin_map.h"
 #include "osapi.h"
 #include <eagle_soc.h>
-#define noInterrupts os_intr_lock
-#define interrupts os_intr_unlock
-#define delayMicroseconds os_delay_us
+#include "Arduino.h"
 
 #if ONEWIRE_SEARCH
 // global search state
@@ -75,7 +73,7 @@ static uint8_t LastDeviceFlag[NUM_OW];
 void onewire_init(uint8_t pin)
 {
 	if(pin_mux[pin] == UNDEFINED_PIN) return;
-	// pinMode(pin, INPUT);
+	 pinMode(pin, INPUT);
  // platform_gpio_mode(pin, PLATFORM_GPIO_INPUT, PLATFORM_GPIO_PULLUP);
 #if ONEWIRE_SEARCH
 	onewire_reset_search(pin);

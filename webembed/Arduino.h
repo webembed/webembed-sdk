@@ -9,10 +9,14 @@
 
 #include "binary.h"
 
+
 #ifdef __cplusplus
 extern "C"{
 #endif
 
+
+#include "osapi.h"
+#include <eagle_soc.h>
 
 #define PI 3.1415926535897932384626433832795
 #define HALF_PI 1.5707963267948966192313216916398
@@ -45,8 +49,8 @@ extern "C"{
 #define degrees(rad) ((rad)*RAD_TO_DEG)
 #define sq(x) ((x)*(x))
 
-//#define interrupts() sei()
-//#define noInterrupts() cli()
+#define interrupts() os_intr_unlock()
+#define noInterrupts() os_intr_lock()
 
 #define F_CPU 80000000L
 
@@ -72,12 +76,12 @@ typedef uint8_t byte;
 
 void init(void);
 
-//TODO
 
 unsigned long millis(void);
 unsigned long micros(void);
 void delay(unsigned long);
-void delayMicroseconds(unsigned int us);
+
+#define delayMicroseconds os_delay_us
 unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout);
 
 void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val);
