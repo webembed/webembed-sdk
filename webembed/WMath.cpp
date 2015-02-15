@@ -25,16 +25,17 @@
 
 extern "C" {
   #include "stdlib.h"
+  #include <c_types.h>
 }
 
-void randomSeed(unsigned int seed)
+void ICACHE_FLASH_ATTR randomSeed(unsigned int seed)
 {
   if (seed != 0) {
     srand(seed);
   }
 }
 
-long random(long howbig)
+long ICACHE_FLASH_ATTR random(long howbig)
 {
   if (howbig == 0) {
     return 0;
@@ -42,7 +43,7 @@ long random(long howbig)
   return rand() % howbig;
 }
 
-long random(long howsmall, long howbig)
+long ICACHE_FLASH_ATTR random(long howsmall, long howbig)
 {
   if (howsmall >= howbig) {
     return howsmall;
@@ -51,7 +52,7 @@ long random(long howsmall, long howbig)
   return random(diff) + howsmall;
 }
 
-long map(long x, long in_min, long in_max, long out_min, long out_max)
+long ICACHE_FLASH_ATTR map(long x, long in_min, long in_max, long out_min, long out_max)
 {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

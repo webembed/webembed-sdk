@@ -23,7 +23,7 @@ LOCAL void gpioint_handler(uint8_t val) {
 
 }
 
-void attachInterrupt(uint8 pin, void(*isr)(), int type) {
+void ICACHE_FLASH_ATTR attachInterrupt(uint8 pin, void(*isr)(), int type) {
 	if(!isValidPin(pin)) return;
 	if(pin == 16) return;
 	if(_interrupt_pin != -1) {
@@ -64,7 +64,7 @@ void attachInterrupt(uint8 pin, void(*isr)(), int type) {
 
 }
 
-void detachInterrupt(uint8 pin) {
+void ICACHE_FLASH_ATTR detachInterrupt(uint8 pin) {
 	if(!isValidPin(pin)) return;
 	if(pin == 16) return;
 	ETS_GPIO_INTR_DISABLE();
@@ -77,7 +77,7 @@ void detachInterrupt(uint8 pin) {
 
 }
 
-void setupInterrupts() {
+void ICACHE_FLASH_ATTR setupInterrupts() {
 	ETS_GPIO_INTR_ATTACH(gpioint_handler, 0);
 }
 

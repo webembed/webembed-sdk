@@ -12,7 +12,7 @@
 #include "driver/pwm.h"
 #include "ets_sys.h"
 
-void pinMode(uint8_t pin, uint8_t mode) {
+void ICACHE_FLASH_ATTR pinMode(uint8_t pin, uint8_t mode) {
 	if(!isValidPin(pin)) return;
 	if(pin == 16) {
 		if(mode == OUTPUT) {
@@ -45,25 +45,25 @@ void pinMode(uint8_t pin, uint8_t mode) {
 
 }
 
-int digitalRead(uint8_t pin) {
+int ICACHE_FLASH_ATTR digitalRead(uint8_t pin) {
 	if(!isValidPin(pin)) return LOW;
     if(pin == 16)
     	return 0x1 & gpio16_input_get();
     return 0x1 & GPIO_INPUT_GET(GPIO_ID_PIN(pin));
 }
 
-void digitalWrite(uint8_t pin, uint8_t value) {
+void ICACHE_FLASH_ATTR digitalWrite(uint8_t pin, uint8_t value) {
 	if(!isValidPin(pin)) return;
     if(pin == 16)
     	gpio16_output_set(value);
     GPIO_OUTPUT_SET(GPIO_ID_PIN(pin), value);
 }
 
-int analogRead() {
+int ICACHE_FLASH_ATTR analogRead() {
 	return system_adc_read();
 }
 
-void analogWrite(uint8_t pin, int value) {
+void ICACHE_FLASH_ATTR analogWrite(uint8_t pin, int value) {
 	if(!pwm_exist(pin)) {
 		if(pwm_add(pin)) {
 			pwm_set_freq(1000,0);

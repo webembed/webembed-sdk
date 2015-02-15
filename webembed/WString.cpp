@@ -21,20 +21,20 @@
 
 #include "WString.h"
 #include <stdlib.h>
-
+#include <c_types.h>
 #include "itoa.h"
 
 /*********************************************/
 /*  Constructors                             */
 /*********************************************/
 
-String::String(const char *cstr)
+ICACHE_FLASH_ATTR String::String(const char *cstr)
 {
 	init();
 	if (cstr) copy(cstr, strlen(cstr));
 }
 
-String::String(const String &value)
+ICACHE_FLASH_ATTR String::String(const String &value)
 {
 	init();
 	*this = value;
@@ -53,7 +53,7 @@ String::String(StringSumHelper &&rval)
 }
 #endif
 
-String::String(char c)
+ICACHE_FLASH_ATTR String::String(char c)
 {
 	init();
 	char buf[2];
@@ -62,7 +62,7 @@ String::String(char c)
 	*this = buf;
 }
 
-String::String(unsigned char value, unsigned char base)
+ICACHE_FLASH_ATTR String::String(unsigned char value, unsigned char base)
 {
 	init();
 	char buf[9];
@@ -70,7 +70,7 @@ String::String(unsigned char value, unsigned char base)
 	*this = buf;
 }
 
-String::String(int value, unsigned char base)
+ICACHE_FLASH_ATTR String::String(int value, unsigned char base)
 {
 	init();
 	char buf[18];
@@ -78,7 +78,7 @@ String::String(int value, unsigned char base)
 	*this = buf;
 }
 
-String::String(unsigned int value, unsigned char base)
+ICACHE_FLASH_ATTR String::String(unsigned int value, unsigned char base)
 {
 	init();
 	char buf[17];
@@ -86,7 +86,7 @@ String::String(unsigned int value, unsigned char base)
 	*this = buf;
 }
 
-String::String(long value, unsigned char base)
+ICACHE_FLASH_ATTR String::String(long value, unsigned char base)
 {
 	init();
 	char buf[34];
@@ -94,7 +94,7 @@ String::String(long value, unsigned char base)
 	*this = buf;
 }
 
-String::String(unsigned long value, unsigned char base)
+ICACHE_FLASH_ATTR String::String(unsigned long value, unsigned char base)
 {
 	init();
 	char buf[33];
@@ -119,14 +119,14 @@ inline void String::init(void)
 	flags = 0;
 }
 
-void String::invalidate(void)
+void ICACHE_FLASH_ATTR String::invalidate(void)
 {
 	if (buffer) free(buffer);
 	buffer = NULL;
 	capacity = len = 0;
 }
 
-unsigned char String::reserve(unsigned int size)
+unsigned char ICACHE_FLASH_ATTR String::reserve(unsigned int size)
 {
 	if (buffer && capacity >= size) return 1;
 	if (changeBuffer(size)) {
@@ -136,7 +136,7 @@ unsigned char String::reserve(unsigned int size)
 	return 0;
 }
 
-unsigned char String::changeBuffer(unsigned int maxStrLen)
+unsigned char ICACHE_FLASH_ATTR String::changeBuffer(unsigned int maxStrLen)
 {
 	char *newbuffer = (char *)realloc(buffer, maxStrLen + 1);
 	if (newbuffer) {
@@ -151,7 +151,7 @@ unsigned char String::changeBuffer(unsigned int maxStrLen)
 /*  Copy and Move                            */
 /*********************************************/
 
-String & String::copy(const char *cstr, unsigned int length)
+String & ICACHE_FLASH_ATTR String::copy(const char *cstr, unsigned int length)
 {
 	if (!reserve(length)) {
 		invalidate();
@@ -184,7 +184,7 @@ void String::move(String &rhs)
 }
 #endif
 
-String & String::operator = (const String &rhs)
+String & ICACHE_FLASH_ATTR String::operator = (const String &rhs)
 {
 	if (this == &rhs) return *this;
 	
@@ -208,7 +208,7 @@ String & String::operator = (StringSumHelper &&rval)
 }
 #endif
 
-String & String::operator = (const char *cstr)
+String & ICACHE_FLASH_ATTR String::operator = (const char *cstr)
 {
 	if (cstr) copy(cstr, strlen(cstr));
 	else invalidate();
@@ -220,12 +220,12 @@ String & String::operator = (const char *cstr)
 /*  concat                                   */
 /*********************************************/
 
-unsigned char String::concat(const String &s)
+unsigned char ICACHE_FLASH_ATTR String::concat(const String &s)
 {
 	return concat(s.buffer, s.len);
 }
 
-unsigned char String::concat(const char *cstr, unsigned int length)
+unsigned char ICACHE_FLASH_ATTR String::concat(const char *cstr, unsigned int length)
 {
 	unsigned int newlen = len + length;
 	if (!cstr) return 0;
@@ -236,13 +236,13 @@ unsigned char String::concat(const char *cstr, unsigned int length)
 	return 1;
 }
 
-unsigned char String::concat(const char *cstr)
+unsigned char ICACHE_FLASH_ATTR String::concat(const char *cstr)
 {
 	if (!cstr) return 0;
 	return concat(cstr, strlen(cstr));
 }
 
-unsigned char String::concat(char c)
+unsigned char ICACHE_FLASH_ATTR String::concat(char c)
 {
 	char buf[2];
 	buf[0] = c;
@@ -250,35 +250,35 @@ unsigned char String::concat(char c)
 	return concat(buf, 1);
 }
 
-unsigned char String::concat(unsigned char num)
+unsigned char ICACHE_FLASH_ATTR String::concat(unsigned char num)
 {
 	char buf[4];
 	itoa(num, buf, 10);
 	return concat(buf, strlen(buf));
 }
 
-unsigned char String::concat(int num)
+unsigned char ICACHE_FLASH_ATTR String::concat(int num)
 {
 	char buf[7];
 	itoa(num, buf, 10);
 	return concat(buf, strlen(buf));
 }
 
-unsigned char String::concat(unsigned int num)
+unsigned char ICACHE_FLASH_ATTR String::concat(unsigned int num)
 {
 	char buf[6];
 	itoa(num, buf, 10);
 	return concat(buf, strlen(buf));
 }
 
-unsigned char String::concat(long num)
+unsigned char ICACHE_FLASH_ATTR String::concat(long num)
 {
 	char buf[12];
 	itoa(num, buf, 10);
 	return concat(buf, strlen(buf));
 }
 
-unsigned char String::concat(unsigned long num)
+unsigned char ICACHE_FLASH_ATTR String::concat(unsigned long num)
 {
 	char buf[11];
 	itoa(num, buf, 10);
@@ -289,56 +289,56 @@ unsigned char String::concat(unsigned long num)
 /*  Concatenate                              */
 /*********************************************/
 
-StringSumHelper & operator + (const StringSumHelper &lhs, const String &rhs)
+StringSumHelper & ICACHE_FLASH_ATTR operator + (const StringSumHelper &lhs, const String &rhs)
 {
 	StringSumHelper &a = const_cast<StringSumHelper&>(lhs);
 	if (!a.concat(rhs.buffer, rhs.len)) a.invalidate();
 	return a;
 }
 
-StringSumHelper & operator + (const StringSumHelper &lhs, const char *cstr)
+StringSumHelper & ICACHE_FLASH_ATTR operator + (const StringSumHelper &lhs, const char *cstr)
 {
 	StringSumHelper &a = const_cast<StringSumHelper&>(lhs);
 	if (!cstr || !a.concat(cstr, strlen(cstr))) a.invalidate();
 	return a;
 }
 
-StringSumHelper & operator + (const StringSumHelper &lhs, char c)
+StringSumHelper & ICACHE_FLASH_ATTR operator + (const StringSumHelper &lhs, char c)
 {
 	StringSumHelper &a = const_cast<StringSumHelper&>(lhs);
 	if (!a.concat(c)) a.invalidate();
 	return a;
 }
 
-StringSumHelper & operator + (const StringSumHelper &lhs, unsigned char num)
+StringSumHelper & ICACHE_FLASH_ATTR operator + (const StringSumHelper &lhs, unsigned char num)
 {
 	StringSumHelper &a = const_cast<StringSumHelper&>(lhs);
 	if (!a.concat(num)) a.invalidate();
 	return a;
 }
 
-StringSumHelper & operator + (const StringSumHelper &lhs, int num)
+StringSumHelper & ICACHE_FLASH_ATTR operator + (const StringSumHelper &lhs, int num)
 {
 	StringSumHelper &a = const_cast<StringSumHelper&>(lhs);
 	if (!a.concat(num)) a.invalidate();
 	return a;
 }
 
-StringSumHelper & operator + (const StringSumHelper &lhs, unsigned int num)
+StringSumHelper & ICACHE_FLASH_ATTR operator + (const StringSumHelper &lhs, unsigned int num)
 {
 	StringSumHelper &a = const_cast<StringSumHelper&>(lhs);
 	if (!a.concat(num)) a.invalidate();
 	return a;
 }
 
-StringSumHelper & operator + (const StringSumHelper &lhs, long num)
+StringSumHelper & ICACHE_FLASH_ATTR operator + (const StringSumHelper &lhs, long num)
 {
 	StringSumHelper &a = const_cast<StringSumHelper&>(lhs);
 	if (!a.concat(num)) a.invalidate();
 	return a;
 }
 
-StringSumHelper & operator + (const StringSumHelper &lhs, unsigned long num)
+StringSumHelper & ICACHE_FLASH_ATTR  operator + (const StringSumHelper &lhs, unsigned long num)
 {
 	StringSumHelper &a = const_cast<StringSumHelper&>(lhs);
 	if (!a.concat(num)) a.invalidate();
@@ -349,7 +349,7 @@ StringSumHelper & operator + (const StringSumHelper &lhs, unsigned long num)
 /*  Comparison                               */
 /*********************************************/
 
-int String::compareTo(const String &s) const
+int ICACHE_FLASH_ATTR String::compareTo(const String &s) const
 {
 	if (!buffer || !s.buffer) {
 		if (s.buffer && s.len > 0) return 0 - *(unsigned char *)s.buffer;
@@ -359,39 +359,39 @@ int String::compareTo(const String &s) const
 	return strcmp(buffer, s.buffer);
 }
 
-unsigned char String::equals(const String &s2) const
+unsigned char ICACHE_FLASH_ATTR String::equals(const String &s2) const
 {
 	return (len == s2.len && compareTo(s2) == 0);
 }
 
-unsigned char String::equals(const char *cstr) const
+unsigned char ICACHE_FLASH_ATTR String::equals(const char *cstr) const
 {
 	if (len == 0) return (cstr == NULL || *cstr == 0);
 	if (cstr == NULL) return buffer[0] == 0;
 	return strcmp(buffer, cstr) == 0;
 }
 
-unsigned char String::operator<(const String &rhs) const
+unsigned char ICACHE_FLASH_ATTR String::operator<(const String &rhs) const
 {
 	return compareTo(rhs) < 0;
 }
 
-unsigned char String::operator>(const String &rhs) const
+unsigned char ICACHE_FLASH_ATTR String::operator>(const String &rhs) const
 {
 	return compareTo(rhs) > 0;
 }
 
-unsigned char String::operator<=(const String &rhs) const
+unsigned char ICACHE_FLASH_ATTR String::operator<=(const String &rhs) const
 {
 	return compareTo(rhs) <= 0;
 }
 
-unsigned char String::operator>=(const String &rhs) const
+unsigned char ICACHE_FLASH_ATTR String::operator>=(const String &rhs) const
 {
 	return compareTo(rhs) >= 0;
 }
 
-unsigned char String::equalsIgnoreCase( const String &s2 ) const
+unsigned char ICACHE_FLASH_ATTR String::equalsIgnoreCase( const String &s2 ) const
 {
 	if (this == &s2) return 1;
 	if (len != s2.len) return 0;
@@ -404,19 +404,19 @@ unsigned char String::equalsIgnoreCase( const String &s2 ) const
 	return 1;
 }
 
-unsigned char String::startsWith( const String &s2 ) const
+unsigned char ICACHE_FLASH_ATTR String::startsWith( const String &s2 ) const
 {
 	if (len < s2.len) return 0;
 	return startsWith(s2, 0);
 }
 
-unsigned char String::startsWith( const String &s2, unsigned int offset ) const
+unsigned char ICACHE_FLASH_ATTR String::startsWith( const String &s2, unsigned int offset ) const
 {
 	if (offset > len - s2.len || !buffer || !s2.buffer) return 0;
 	return strncmp( &buffer[offset], s2.buffer, s2.len ) == 0;
 }
 
-unsigned char String::endsWith( const String &s2 ) const
+unsigned char ICACHE_FLASH_ATTR String::endsWith( const String &s2 ) const
 {
 	if ( len < s2.len || !buffer || !s2.buffer) return 0;
 	return strcmp(&buffer[len - s2.len], s2.buffer) == 0;
@@ -426,17 +426,17 @@ unsigned char String::endsWith( const String &s2 ) const
 /*  Character Access                         */
 /*********************************************/
 
-char String::charAt(unsigned int loc) const
+char ICACHE_FLASH_ATTR String::charAt(unsigned int loc) const
 {
 	return operator[](loc);
 }
 
-void String::setCharAt(unsigned int loc, char c) 
+void ICACHE_FLASH_ATTR String::setCharAt(unsigned int loc, char c)
 {
 	if (loc < len) buffer[loc] = c;
 }
 
-char & String::operator[](unsigned int index)
+char & ICACHE_FLASH_ATTR String::operator[](unsigned int index)
 {
 	static char dummy_writable_char;
 	if (index >= len || !buffer) {
@@ -446,13 +446,13 @@ char & String::operator[](unsigned int index)
 	return buffer[index];
 }
 
-char String::operator[]( unsigned int index ) const
+char ICACHE_FLASH_ATTR String::operator[]( unsigned int index ) const
 {
 	if (index >= len || !buffer) return 0;
 	return buffer[index];
 }
 
-void String::getBytes(unsigned char *buf, unsigned int bufsize, unsigned int index) const
+void ICACHE_FLASH_ATTR String::getBytes(unsigned char *buf, unsigned int bufsize, unsigned int index) const
 {
 	if (!bufsize || !buf) return;
 	if (index >= len) {
@@ -469,12 +469,12 @@ void String::getBytes(unsigned char *buf, unsigned int bufsize, unsigned int ind
 /*  Search                                   */
 /*********************************************/
 
-int String::indexOf(char c) const
+int ICACHE_FLASH_ATTR String::indexOf(char c) const
 {
 	return indexOf(c, 0);
 }
 
-int String::indexOf( char ch, unsigned int fromIndex ) const
+int ICACHE_FLASH_ATTR String::indexOf( char ch, unsigned int fromIndex ) const
 {
 	if (fromIndex >= len) return -1;
 	const char* temp = strchr(buffer + fromIndex, ch);
@@ -482,12 +482,12 @@ int String::indexOf( char ch, unsigned int fromIndex ) const
 	return temp - buffer;
 }
 
-int String::indexOf(const String &s2) const
+int ICACHE_FLASH_ATTR String::indexOf(const String &s2) const
 {
 	return indexOf(s2, 0);
 }
 
-int String::indexOf(const String &s2, unsigned int fromIndex) const
+int ICACHE_FLASH_ATTR String::indexOf(const String &s2, unsigned int fromIndex) const
 {
 	if (fromIndex >= len) return -1;
 	const char *found = strstr(buffer + fromIndex, s2.buffer);
@@ -495,12 +495,12 @@ int String::indexOf(const String &s2, unsigned int fromIndex) const
 	return found - buffer;
 }
 
-int String::lastIndexOf( char theChar ) const
+int ICACHE_FLASH_ATTR String::lastIndexOf( char theChar ) const
 {
 	return lastIndexOf(theChar, len - 1);
 }
 
-int String::lastIndexOf(char ch, unsigned int fromIndex) const
+int ICACHE_FLASH_ATTR String::lastIndexOf(char ch, unsigned int fromIndex) const
 {
 	if (fromIndex >= len) return -1;
 	char tempchar = buffer[fromIndex + 1];
@@ -511,12 +511,12 @@ int String::lastIndexOf(char ch, unsigned int fromIndex) const
 	return temp - buffer;
 }
 
-int String::lastIndexOf(const String &s2) const
+int ICACHE_FLASH_ATTR String::lastIndexOf(const String &s2) const
 {
 	return lastIndexOf(s2, len - s2.len);
 }
 
-int String::lastIndexOf(const String &s2, unsigned int fromIndex) const
+int ICACHE_FLASH_ATTR String::lastIndexOf(const String &s2, unsigned int fromIndex) const
 {
   	if (s2.len == 0 || len == 0 || s2.len > len) return -1;
 	if (fromIndex >= len) fromIndex = len - 1;
@@ -529,12 +529,12 @@ int String::lastIndexOf(const String &s2, unsigned int fromIndex) const
 	return found;
 }
 
-String String::substring( unsigned int left ) const
+String ICACHE_FLASH_ATTR String::substring( unsigned int left ) const
 {
 	return substring(left, len);
 }
 
-String String::substring(unsigned int left, unsigned int right) const
+String ICACHE_FLASH_ATTR String::substring(unsigned int left, unsigned int right) const
 {
 	if (left > right) {
 		unsigned int temp = right;
@@ -555,7 +555,7 @@ String String::substring(unsigned int left, unsigned int right) const
 /*  Modification                             */
 /*********************************************/
 
-void String::replace(char find, char replace)
+void ICACHE_FLASH_ATTR String::replace(char find, char replace)
 {
 	if (!buffer) return;
 	for (char *p = buffer; *p; p++) {
@@ -563,7 +563,7 @@ void String::replace(char find, char replace)
 	}
 }
 
-void String::replace(const String& find, const String& replace)
+void ICACHE_FLASH_ATTR String::replace(const String& find, const String& replace)
 {
 	if (len == 0 || find.len == 0) return;
 	int diff = replace.len - find.len;
@@ -606,7 +606,7 @@ void String::replace(const String& find, const String& replace)
 	}
 }
 
-void String::toLowerCase(void)
+void ICACHE_FLASH_ATTR String::toLowerCase(void)
 {
 	if (!buffer) return;
 	for (char *p = buffer; *p; p++) {
@@ -614,7 +614,7 @@ void String::toLowerCase(void)
 	}
 }
 
-void String::toUpperCase(void)
+void ICACHE_FLASH_ATTR String::toUpperCase(void)
 {
 	if (!buffer) return;
 	for (char *p = buffer; *p; p++) {
@@ -622,7 +622,7 @@ void String::toUpperCase(void)
 	}
 }
 
-void String::trim(void)
+void ICACHE_FLASH_ATTR String::trim(void)
 {
 	if (!buffer || len == 0) return;
 	char *begin = buffer;
@@ -638,7 +638,7 @@ void String::trim(void)
 /*  Parsing / Conversion                     */
 /*********************************************/
 
-long String::toInt(void) const
+long ICACHE_FLASH_ATTR String::toInt(void) const
 {
 	if (buffer) return atol(buffer);
 	return 0;
