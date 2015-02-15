@@ -7,9 +7,12 @@
 #include <os_type.h>
 #include <gpio.h>
 #include <vector>
+#include <c_types.h>
 #include "routines.h"
 #include "Arduino.h"
 #include "WiFi.h"
+#include "ESPAPI.h"
+
 #define DELAY 1000 /* milliseconds */
 
 // =============================================================================================
@@ -94,9 +97,13 @@ LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 	//ets_uart_printf("Interrupt count: %d, m=%lu, u=%lu\n",intrCount,millis(),micros());
 	if(GetWiFiStatus() == STATION_GOT_IP) {
 		IPAddress addr = GetStationIPAddress();
-		ets_uart_printf("IP addr: %d.%d.%d.%d\n",addr.parts.a,addr.parts.b,addr.parts.c,addr.parts.d);
+		os_printf("IP addr: %d.%d.%d.%d\n",addr.parts.a,addr.parts.b,addr.parts.c,addr.parts.d);
 	} else {
-		ets_uart_printf("WiFi status: %d\n", GetWiFiStatus());
+		os_printf("WiFi status: %d\n", GetWiFiStatus());
+	}
+	if(millis() > 5000) {
+		ets_uart_printf("Debug off\n");
+		DisableDebugMessages();
 	}
 }
 
@@ -118,6 +125,7 @@ extern "C" void user_init(void)
 	intrCount = 0;
 	// Configure the UART
 	uart_init(BIT_RATE_115200, BIT_RATE_115200);
+	EnableDebugMessages();
 	a.print();
 	// Set up a timer to send the message
 	// os_timer_disarm(ETSTimer *ptimer)
@@ -130,6 +138,6 @@ extern "C" void user_init(void)
 //	setupInterrupts();
 //	attachInterrupt(0, interruptHandler, FALLING);
 	EnterStationMode();
-	//SetWiFiStationConfig("ASUS","XXXXXXXXX");
+	//SetWiFiStationConfig("ASUS","XXXXXXXX");
 	EnableAutoConnect();
 }
