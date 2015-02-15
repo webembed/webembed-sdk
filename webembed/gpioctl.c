@@ -4,6 +4,7 @@
  * See LICENSE for details
  */
 #include "gpioctl.h"
+#include "gpioint.h"
 #include "gpio.h"
 #include "driver/uart.h"
 #include "driver/gpio16.h"
@@ -33,24 +34,15 @@ void pinMode(uint8_t pin, uint8_t mode) {
 	if(mode == INPUT_PULLUP)
 		PIN_PULLUP_EN(pin_mux[pin]);
 
-	ETS_GPIO_INTR_DISABLE();
-
     if(mode == OUTPUT) {
         GPIO_OUTPUT_SET(pin,0);
     } else {
         GPIO_DIS_OUTPUT(pin);
     }
     PIN_FUNC_SELECT(pin_mux[pin], pin_func[pin]);
-	//disable interrupt
-	gpio_pin_intr_state_set(GPIO_ID_PIN(pin), GPIO_PIN_INTR_DISABLE);
-	 //clear interrupt status
-    GPIO_REG_WRITE(GPIO_STATUS_W1TC_ADDRESS, BIT(pin));
-    GPIO_REG_WRITE(GPIO_PIN_ADDR(GPIO_ID_PIN(pin)), GPIO_REG_READ(GPIO_PIN_ADDR(GPIO_ID_PIN(pin))) & (~ GPIO_PIN_PAD_DRIVER_SET(GPIO_PAD_DRIVER_ENABLE))); //disable open drain;
-	#ifdef GPIO_INTERRUPT_ENABLE
-		pin_int_type[pin] = GPIO_PIN_INTR_DISABLE;
-	#endif
 
-    ETS_GPIO_INTR_ENABLE();
+    GPIO_REG_WRITE(GPIO_PIN_ADDR(GPIO_ID_PIN(pin)), GPIO_REG_READ(GPIO_PIN_ADDR(GPIO_ID_PIN(pin))) & (~ GPIO_PIN_PAD_DRIVER_SET(GPIO_PAD_DRIVER_ENABLE))); //disable open drain;
+
 }
 
 int digitalRead(uint8_t pin) {

@@ -8,8 +8,8 @@
 #include <gpio.h>
 #include <vector>
 #include "routines.h"
-#include "gpioctl.h"
-#define DELAY 50 /* milliseconds */
+#include "Arduino.h"
+#define DELAY 1000 /* milliseconds */
 
 // =============================================================================================
 // C includes and declarations
@@ -82,25 +82,32 @@ LOCAL os_timer_t hello_timer;
 // =============================================================================================
 // User code
 // =============================================================================================
-int value;
+int value, intrCount;
 LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 {
-	static int counter = 0;
+/*	static int counter = 0;
 	ets_uart_printf("Hello World #%d val=%d!\r\n", counter++, value);
 	analogWrite(2,value);
-	value = (value + 10) % 1024;
+	value = (value + 10) % 1024;*/
+	ets_uart_printf("Interrupt count: %d\n",intrCount);
 }
 
 
 A a;
 
+void interruptHandler() {
+	intrCount++;
+}
+
 extern "C" void user_init(void)
 {
 	do_global_ctors();
+	setupInterrupts();
 	pinMode(0,INPUT_PULLUP);
 	pinMode(2,OUTPUT);
 	digitalWrite(2, HIGH);
 	value = 0;
+	intrCount = 0;
 	// Configure the UART
 	uart_init(BIT_RATE_115200, BIT_RATE_115200);
 	a.print();
@@ -111,7 +118,8 @@ extern "C" void user_init(void)
 	os_timer_setfn(&hello_timer, (os_timer_func_t *)hello_cb, (void *)0);
 	// void os_timer_arm(ETSTimer *ptimer,uint32_t milliseconds, bool repeat_flag)
 	os_timer_arm(&hello_timer, DELAY, 1);
-	pwm_init(1000,0);
-
+//	pwm_init(1000,0);
+	setupInterrupts();
+	attachInterrupt(0, interruptHandler, FALLING);
 
 }

@@ -6,6 +6,7 @@
 #include <math.h>
 
 #include "gpioctl.h"
+#include "gpioint.h"
 
 #include "binary.h"
 
@@ -30,9 +31,6 @@ extern "C"{
 #define LSBFIRST 0
 #define MSBFIRST 1
 
-#define CHANGE 1
-#define FALLING 2
-#define RISING 3
 
 
 // undefine stdlib's abs if encountered
