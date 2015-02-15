@@ -87,7 +87,7 @@ LOCAL os_timer_t hello_timer;
 // User code
 // =============================================================================================
 int value, intrCount;
-
+bool messsagesDisabled = false;
 LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 {
 /*	static int counter = 0;
@@ -95,15 +95,27 @@ LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 	analogWrite(2,value);
 	value = (value + 10) % 1024;*/
 	//ets_uart_printf("Interrupt count: %d, m=%lu, u=%lu\n",intrCount,millis(),micros());
+
+	uint32 rtcCount = LoadRTC(0);
+	ets_uart_printf("\nrtc count:%d\n",rtcCount);
+	rtcCount++;
+	StoreRTC(0,rtcCount);
+
 	if(GetWiFiStatus() == STATION_GOT_IP) {
 		IPAddress addr = GetStationIPAddress();
 		os_printf("IP addr: %d.%d.%d.%d\n",addr.parts.a,addr.parts.b,addr.parts.c,addr.parts.d);
 	} else {
 		os_printf("WiFi status: %d\n", GetWiFiStatus());
 	}
-	if(millis() > 5000) {
-		ets_uart_printf("Debug off\n");
-		DisableDebugMessages();
+
+	if((!messsagesDisabled) && (millis() > 5000)) {
+		//os_printf("Debug off\n");
+	//	DisableDebugMessages();
+	//	messsagesDisabled = true;
+	}
+	if(millis() > 7000) {
+		system_deep_sleep_set_option(1);
+		DeepSleep(3);
 	}
 }
 
@@ -137,6 +149,8 @@ extern "C" void user_init(void)
 //	pwm_init(1000,0);
 //	setupInterrupts();
 //	attachInterrupt(0, interruptHandler, FALLING);
+
+
 	EnterStationMode();
 	//SetWiFiStationConfig("ASUS","XXXXXXXX");
 	EnableAutoConnect();

@@ -40,6 +40,19 @@ void DisableDebugMessages();
 //Needed to enable use of os_printf
 int os_printf_plus(const char *format, ...)  __attribute__ ((format (printf, 1, 2)));
 
+//Enter deep sleep mode for a given number of seconds (max 35 mins)
+//If time is set to zero, then the ESP8266 will only wake if there is a falling edge on the RST pin
+//To wake after a given amount of time, GPIO16 and RESET must be tied together
+#define DeepSleep(t) system_deep_sleep((uint32)(t*1000000))
+
+//User RTC memory can be used to store variables during deep sleep
+//This function stores a 32-bit variable in RTC memory. Address refers to a 32-bit block and goes from 0 to 127
+void StoreRTC(uint32 addr, uint32 data);
+
+//This function fetches a 32-bit variable from RTC memory. Address refers to a 32-bit block and goes from 0 to 127
+uint32 LoadRTC(uint32 addr);
+
+
 
 #ifdef __cplusplus
 }

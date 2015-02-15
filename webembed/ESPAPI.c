@@ -18,3 +18,13 @@ void ICACHE_FLASH_ATTR EnableDebugMessages() {
 void ICACHE_FLASH_ATTR DisableDebugMessages() {
 	os_install_putc1(NULL);
 }
+
+void ICACHE_FLASH_ATTR StoreRTC(uint32 addr, uint32 data) {
+	system_rtc_mem_write(addr+64,&data,4);
+}
+
+uint32 ICACHE_FLASH_ATTR LoadRTC(uint32 addr) {
+	uint32 data;
+	system_rtc_mem_read(addr+64,&data,4);
+	return data;
+}
