@@ -10,6 +10,8 @@
 // #define DEVELOP_VERSION
 #define FULL_VERSION_FOR_USER
 
+#define USE_US_TIMER
+
 #define USE_OPTIMIZE_PRINTF
 
 #ifdef DEVELOP_VERSION

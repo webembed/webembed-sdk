@@ -89,7 +89,7 @@ LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 	ets_uart_printf("Hello World #%d val=%d!\r\n", counter++, value);
 	analogWrite(2,value);
 	value = (value + 10) % 1024;*/
-	ets_uart_printf("Interrupt count: %d\n",intrCount);
+	ets_uart_printf("Interrupt count: %d, m=%lu, u=%lu\n",intrCount,millis(),micros());
 }
 
 
@@ -102,7 +102,7 @@ void interruptHandler() {
 extern "C" void user_init(void)
 {
 	do_global_ctors();
-	setupInterrupts();
+	init();
 	pinMode(0,INPUT_PULLUP);
 	pinMode(2,OUTPUT);
 	digitalWrite(2, HIGH);
