@@ -9,6 +9,7 @@
 #include <vector>
 #include "routines.h"
 #include "Arduino.h"
+#include "WiFi.h"
 #define DELAY 1000 /* milliseconds */
 
 // =============================================================================================
@@ -83,13 +84,20 @@ LOCAL os_timer_t hello_timer;
 // User code
 // =============================================================================================
 int value, intrCount;
+
 LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 {
 /*	static int counter = 0;
 	ets_uart_printf("Hello World #%d val=%d!\r\n", counter++, value);
 	analogWrite(2,value);
 	value = (value + 10) % 1024;*/
-	ets_uart_printf("Interrupt count: %d, m=%lu, u=%lu\n",intrCount,millis(),micros());
+	//ets_uart_printf("Interrupt count: %d, m=%lu, u=%lu\n",intrCount,millis(),micros());
+	if(GetWiFiStatus() == STATION_GOT_IP) {
+		IPAddress addr = GetStationIPAddress();
+		ets_uart_printf("IP addr: %d.%d.%d.%d\n",addr.parts.a,addr.parts.b,addr.parts.c,addr.parts.d);
+	} else {
+		ets_uart_printf("WiFi status: %d\n", GetWiFiStatus());
+	}
 }
 
 
@@ -119,7 +127,9 @@ extern "C" void user_init(void)
 	// void os_timer_arm(ETSTimer *ptimer,uint32_t milliseconds, bool repeat_flag)
 	os_timer_arm(&hello_timer, DELAY, 1);
 //	pwm_init(1000,0);
-	setupInterrupts();
-	attachInterrupt(0, interruptHandler, FALLING);
-
+//	setupInterrupts();
+//	attachInterrupt(0, interruptHandler, FALLING);
+	EnterStationMode();
+	//SetWiFiStationConfig("ASUS","XXXXXXXXX");
+	EnableAutoConnect();
 }
