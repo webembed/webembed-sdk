@@ -11,6 +11,7 @@
 #include "routines.h"
 #include "Arduino.h"
 #include "WiFi.h"
+#include "WebServer.h"
 #include "ESPAPI.h"
 
 #define DELAY 1000 /* milliseconds */
@@ -88,6 +89,7 @@ LOCAL os_timer_t hello_timer;
 // =============================================================================================
 int value, intrCount;
 bool messsagesDisabled = false;
+WebServer server;
 LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 {
 /*	static int counter = 0;
@@ -96,14 +98,15 @@ LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 	value = (value + 10) % 1024;*/
 	//ets_uart_printf("Interrupt count: %d, m=%lu, u=%lu\n",intrCount,millis(),micros());
 
-	uint32 rtcCount = LoadRTC(0);
+/*	uint32 rtcCount = LoadRTC(0);
 	ets_uart_printf("\nrtc count:%d\n",rtcCount);
 	rtcCount++;
-	StoreRTC(0,rtcCount);
+	StoreRTC(0,rtcCount);*/
 
 	if(GetWiFiStatus() == STATION_GOT_IP) {
 		IPAddress addr = GetStationIPAddress();
 		os_printf("IP addr: %d.%d.%d.%d\n",addr.parts.a,addr.parts.b,addr.parts.c,addr.parts.d);
+		os_printf("Free heap memory: %d\n",system_get_free_heap_size());
 	} else {
 		os_printf("WiFi status: %d\n", GetWiFiStatus());
 	}
@@ -114,8 +117,8 @@ LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 	//	messsagesDisabled = true;
 	}
 	if(millis() > 7000) {
-		system_deep_sleep_set_option(1);
-		DeepSleep(3);
+		//system_deep_sleep_set_option(1);
+	//	DeepSleep(3);
 	}
 }
 
@@ -154,4 +157,5 @@ extern "C" void user_init(void)
 	EnterStationMode();
 	//SetWiFiStationConfig("ASUS","XXXXXXXX");
 	EnableAutoConnect();
+	server.begin(80);
 }
