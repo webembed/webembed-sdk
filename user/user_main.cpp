@@ -81,8 +81,38 @@ private:
 // =============================================================================================
 
 LOCAL os_timer_t hello_timer;
+static const char *header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n";
+static const char *pagePartA = "<html><body><h1>Hello World!</h1>";
+static const char *pagePartB = "<p><a href='/up'>INC</a> <a href='/down'>DEC</a></p></body></html>";
+
+int pwmValue = 500;
+
+int ICACHE_FLASH_ATTR CGITest(WebRequest *req, const void *arg) {
+	req->sendData(header);
+	req->sendData(pagePartA);
+	char buf[128];
+	int l = os_sprintf(buf,"<p>Current value: %d</p>",pwmValue);
+	req->sendData(buf, l);
+
+	req->sendData(pagePartB);
+	return CGI_DONE;
+}
 
 
+static const char *redir = "HTTP/1.0 302 Found\r\nLocation: /\r\n\r\n";
+int ICACHE_FLASH_ATTR CGISet(WebRequest *req, const void *arg) {
+	int a = 0;
+	if(os_strcmp(req->url,"/up") == 0) a = 100;
+	if(os_strcmp(req->url,"/down") == 0) a = -100;
+
+	os_printf("set by %d\n",a);
+	pwmValue += a;
+	if(pwmValue >= 1024) pwmValue = 1023;
+	if(pwmValue < 0) pwmValue = 0;
+	analogWrite(2, (pwmValue*pwmValue)/1023);
+	req->sendData(redir);
+	return CGI_DONE;
+}
 
 // =============================================================================================
 // User code
@@ -129,6 +159,11 @@ void interruptHandler() {
 	intrCount++;
 }
 
+
+PageHandler p = {"/",CGITest,NULL};
+PageHandler pinc = {"/up",CGISet,NULL};
+PageHandler pdec = {"/down",CGISet,NULL};
+
 extern "C" void user_init(void)
 {
 	do_global_ctors();
@@ -149,7 +184,8 @@ extern "C" void user_init(void)
 	os_timer_setfn(&hello_timer, (os_timer_func_t *)hello_cb, (void *)0);
 	// void os_timer_arm(ETSTimer *ptimer,uint32_t milliseconds, bool repeat_flag)
 	os_timer_arm(&hello_timer, DELAY, 1);
-//	pwm_init(1000,0);
+	pwm_init(1000,0);
+	analogWrite(2,pwmValue);
 //	setupInterrupts();
 //	attachInterrupt(0, interruptHandler, FALLING);
 
@@ -157,5 +193,10 @@ extern "C" void user_init(void)
 	EnterStationMode();
 	//SetWiFiStationConfig("ASUS","XXXXXXXX");
 	EnableAutoConnect();
+	server.pages.push_back(p);
+	server.pages.push_back(pinc);
+	server.pages.push_back(pdec);
+
+
 	server.begin(80);
 }

@@ -36,7 +36,7 @@ using namespace std;
 class WebServer;
 class WebRequest;
 
-typedef int(*CGIFunction)(WebRequest*,void*);
+typedef int(*CGIFunction)(WebRequest*,const void*);
 
 struct PageHandler {
 	const char *page;
@@ -49,7 +49,7 @@ struct PageHandler {
 
 #define CGI_DONE 0
 #define CGI_MORE_DATA 1
-#define CGI_ERROR 2
+#define CGI_ERROR_NOTFOUND 2
 
 class WebRequest {
 	friend WebServer;
@@ -58,7 +58,7 @@ public:
 	espconn *conn;
 	WebServer *server;
 	CGIFunction handler;
-	const void *handlerArgs;
+	const void *handlerArg;
 
 	char *url;
 
@@ -76,12 +76,16 @@ public:
 	int posInPostData;
 	int postDataLength;
 
+	bool toDelete;
 
 	//Add data to send buffer. Returns false on failure
 	bool sendData(const char * buffer, int len);
 	bool sendData(const char * str);
-
+	//Flush send buffer
+	void flushBuffer();
 	int lastStatus;
+	//Generates an HTTP error with a given code and optional extra message
+	void HTTPError(int code, const char * message = NULL);
 
 	void end();
 private:
@@ -120,5 +124,7 @@ private:
 //Returns true if a string begins with a given substring
 bool beginsWith(char *str, const char *search);
 
+//Returns true if a string ends with a given substring
+bool endsWith(char *str, const char *search);
 #endif
 

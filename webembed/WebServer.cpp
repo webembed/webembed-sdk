@@ -1,6 +1,6 @@
 /*
  * Part of the WebEmbed project
- * Basic Web Server, inspired by esphttpd
+ * Basic Web Server, effectively an OOP version of esphttpd with some changes (see http://git.spritesserver.nl/esphttpd.git/)
  * See LICENSE for details
  */
 
@@ -16,13 +16,86 @@ ICACHE_FLASH_ATTR WebRequest::WebRequest() {
 	posInSendBuffer = 0;
 	posInPostData = 0;
 	postDataLength = 0;
-	lastStatus = CGI_ERROR;
+	lastStatus = CGI_ERROR_NOTFOUND;
     receivingHeader = true;
+    toDelete = false;
+}
+
+bool ICACHE_FLASH_ATTR WebRequest::sendData(const char * str) {
+	return sendData(str,os_strlen(str));
+}
+
+bool ICACHE_FLASH_ATTR WebRequest::sendData(const char *data, int length) {
+	if(posInSendBuffer+length>SENDBUFFER_SIZE) return false;
+	os_memcpy(sendBuffer + posInSendBuffer, data, length);
+	posInSendBuffer += length;
+	return true;
+}
+
+void ICACHE_FLASH_ATTR WebRequest::flushBuffer() {
+	if(posInSendBuffer > 0) {
+		espconn_sent(conn,(uint8_t*)sendBuffer,posInSendBuffer);
+		posInSendBuffer = 0;
+	}
+}
+
+void ICACHE_FLASH_ATTR WebRequest::end() {
+	if(postData != NULL) delete[] postData;
+	postData = NULL;
+	handler = NULL;
+	conn = NULL;
 }
 
 void ICACHE_FLASH_ATTR WebRequest::beginResponse() {
-
+	for(int i = 0; i < server->pages.size(); i++) {
+		bool match = false;
+		if(os_strcmp(server->pages[i].page, url)==0) {
+			match = true;
+		} else if(server->pages[i].page[os_strlen(server->pages[i].page)-1] == '*') {
+			if(os_strncmp(server->pages[i].page, url, os_strlen(server->pages[i].page))==0) {
+				match = true;
+			}
+		}
+		if(match) {
+			handler = server->pages[i].function;
+			handlerArg = server->pages[i].page;
+			lastStatus = (*handler)(this, handlerArg);
+			if(lastStatus != CGI_ERROR_NOTFOUND) {
+				if(lastStatus == CGI_DONE) toDelete = true;
+				return;
+			}
+		}
+	}
+	HTTPError(404);
 }
+
+static const char *Http400 = "HTTP/1.0 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nBad Request.\r\n";
+static const char *Http403 = "HTTP/1.0 403 Forbidden\r\nContent-Type: text/plain\r\n\r\nForbidden.\r\n";
+static const char *Http404 = "HTTP/1.0 404 Not Found\r\nContent-Type: text/plain\r\n\r\nNot Found.\r\n";
+static const char *Http500 = "HTTP/1.0 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nInternal Server Error.\r\n";
+
+
+void ICACHE_FLASH_ATTR WebRequest::HTTPError(int code, const char *message) {
+	os_printf("HTTP Error %d!\n",code);
+	switch(code) {
+	case 400:
+		sendData(Http400);
+		break;
+	case 403:
+		sendData(Http403);
+		break;
+	case 404:
+		sendData(Http404);
+		break;
+	case 500:
+		sendData(Http500);
+		break;
+	}
+	if(message != NULL) {
+		sendData(message);
+	}
+	toDelete = true;
+};
 
 void ICACHE_FLASH_ATTR WebRequest::parseHeader() {
 	char *startOfLine = header;
@@ -106,8 +179,9 @@ void ICACHE_FLASH_ATTR WebServer::connectCallback(void *arg) {
 	server->currentRequests[conn_slot].posInPostData = 0;
 	server->currentRequests[conn_slot].postDataLength = 0;
 	server->currentRequests[conn_slot].receivingHeader = true;
+	server->currentRequests[conn_slot].toDelete = false;
 
-	server->currentRequests[conn_slot].lastStatus = CGI_ERROR;
+	server->currentRequests[conn_slot].lastStatus = CGI_ERROR_NOTFOUND;
 
 	espconn_regist_recvcb(conn,dataReceivedCallback);
 	espconn_regist_sentcb(conn,dataSentCallback);
@@ -140,7 +214,7 @@ void ICACHE_FLASH_ATTR WebServer::dataReceivedCallback(void *arg, char *data, un
 				currentRequest->url = NULL;
 				currentRequest->parseHeader();
 				if(currentRequest->postDataLength == 0) {
-					//begin response
+					currentRequest->beginResponse();
 					break;
 				}
 			}
@@ -155,12 +229,13 @@ void ICACHE_FLASH_ATTR WebServer::dataReceivedCallback(void *arg, char *data, un
 				currentRequest->postData[currentRequest->postDataLength] = 0; //set post data terminator
 				//setting posInPostData to -1 indicates we are done
 				currentRequest->posInPostData = -1;
-				//begin response
+				currentRequest->beginResponse();
 				break;
 			}
 		}
 
 	}
+	currentRequest->flushBuffer();
 	//espconn_sent(conn,(unsigned char *)test,(short)strlen(test));
 }
 void ICACHE_FLASH_ATTR WebServer::dataSentCallback(void *arg) {
@@ -172,10 +247,36 @@ void ICACHE_FLASH_ATTR WebServer::dataSentCallback(void *arg) {
 	/*os_printf("Done now.\n");
 	espconn_disconnect(conn);
 	currentRequest->conn = NULL;*/
+
+	if(currentRequest->toDelete) {
+		espconn_disconnect(currentRequest->conn);
+		currentRequest->end();
+		return;
+	}
+
+	char sendBuffer[SENDBUFFER_SIZE];
+	currentRequest->sendBuffer = sendBuffer;
+	currentRequest->posInSendBuffer = 0;
+
+	currentRequest->lastStatus = (*currentRequest->handler)(currentRequest,currentRequest->handlerArg);
+	if(currentRequest->lastStatus != CGI_MORE_DATA) {
+		currentRequest->toDelete = true;
+	}
+	currentRequest->flushBuffer();
 }
 
 void ICACHE_FLASH_ATTR WebServer::disconnectCallback(void *arg) {
-	//do something
+	espconn *conn = (espconn*)arg;
+	WebServer *server = findServer(conn);
+	DIE_IF(server == NULL,"Can't find server [disconnect callback], bad port?\n");
+	//see esphttpd - various broken parts of the SDK mean some hackiness is needed
+	for(int i = 0; i < MAX_SIMULTANEOUS_CONNECTIONS; i++) {
+		if(server->currentRequests[i].conn != NULL) {
+			if(server->currentRequests[i].conn->state == ESPCONN_NONE || server->currentRequests[i].conn->state >= ESPCONN_CLOSE) {
+				server->currentRequests[i].end();
+			}
+		}
+	}
 }
 
 WebServer * ICACHE_FLASH_ATTR WebServer::findServer(espconn *conn) {
@@ -199,3 +300,5 @@ WebRequest * ICACHE_FLASH_ATTR WebServer::findRequest(espconn *conn) {
 bool ICACHE_FLASH_ATTR beginsWith(char *str, const char *search) {
 	return (os_strncmp(str,search,strlen(search))==0);
 }
+
+
