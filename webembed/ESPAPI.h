@@ -44,12 +44,27 @@ void DisableDebugMessages();
 //To wake after a given amount of time, GPIO16 and RESET must be tied together
 #define DeepSleep(t) system_deep_sleep((uint32)(t*1000000))
 
+//Gets the unique chip ID
+#define GetChipID() system_get_chip_id()
+
+//Gets microseconds from RTC (counter continues during deep sleep)
+#define microsRTC() (system_get_rtc_time()*(system_rtc_clock_cali_proc()/4096.0))
+
+//Gets milliseconds from RTC (counter continues during deep sleep
+#define millisRTC() (system_get_rtc_time()*(system_rtc_clock_cali_proc()/4096.0)/1000)
+
 //User RTC memory can be used to store variables during deep sleep
 //This function stores a 32-bit variable in RTC memory. Address refers to a 32-bit block and goes from 0 to 127
 void StoreRTC(uint32 addr, uint32 data);
 
 //This function fetches a 32-bit variable from RTC memory. Address refers to a 32-bit block and goes from 0 to 127
 uint32 LoadRTC(uint32 addr);
+
+//Reboot chip
+#define Reset system_restart
+
+//Reset all settings - saved wireless network, etc
+#define ResetSettings system_restore
 
 
 

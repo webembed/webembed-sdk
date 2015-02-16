@@ -137,19 +137,12 @@ LOCAL void ICACHE_FLASH_ATTR hello_cb(void *arg)
 		IPAddress addr = GetStationIPAddress();
 		os_printf("IP addr: %d.%d.%d.%d\n",addr.parts.a,addr.parts.b,addr.parts.c,addr.parts.d);
 		os_printf("Free heap memory: %d\n",system_get_free_heap_size());
+
+
 	} else {
 		os_printf("WiFi status: %d\n", GetWiFiStatus());
 	}
 
-	if((!messsagesDisabled) && (millis() > 5000)) {
-		//os_printf("Debug off\n");
-	//	DisableDebugMessages();
-	//	messsagesDisabled = true;
-	}
-	if(millis() > 7000) {
-		//system_deep_sleep_set_option(1);
-	//	DeepSleep(3);
-	}
 }
 
 
