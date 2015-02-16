@@ -8,7 +8,7 @@
 #define ESPAPI_H
 #include <stdlib.h>
 #include <c_types.h>
-
+#include <misc_includes.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -37,8 +37,7 @@ void EnableDebugMessages();
 //Stop printing debug messages to serial console
 void DisableDebugMessages();
 
-//Needed to enable use of os_printf
-int os_printf_plus(const char *format, ...)  __attribute__ ((format (printf, 1, 2)));
+
 
 //Enter deep sleep mode for a given number of seconds (max 35 mins)
 //If time is set to zero, then the ESP8266 will only wake if there is a falling edge on the RST pin

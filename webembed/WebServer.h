@@ -10,14 +10,17 @@
 #include <vector>
 #include <c_types.h>
 #include <ip_addr.h>
+#include <stdlib.h>
 
 extern "C" {
 #include <espconn.h>
+#include <ets_sys.h>
+#include <osapi.h>
 
 }
 
 
-#include <ESPAPI.h>
+#include <misc_includes.h>
 
 #define DIE_IF(cond,message) if(cond) {os_printf(message);espconn_disconnect(conn);return;}
 
@@ -49,6 +52,7 @@ struct PageHandler {
 #define CGI_ERROR 2
 
 class WebRequest {
+	friend WebServer;
 public:
 	WebRequest();
 	espconn *conn;
@@ -58,7 +62,7 @@ public:
 
 	char *url;
 
-	char *httpGETArgs;
+	char *queryString;
 
 	bool receivingHeader;
 
@@ -73,7 +77,6 @@ public:
 	int postDataLength;
 
 
-
 	//Add data to send buffer. Returns false on failure
 	bool sendData(const char * buffer, int len);
 	bool sendData(const char * str);
@@ -81,6 +84,13 @@ public:
 	int lastStatus;
 
 	void end();
+private:
+
+	//Parse header line and return pointer to next line, or null if done
+	void parseHeader();
+
+	//Begins the response, including searching the server for the correct CGI function
+	void beginResponse();
 };
 
 #define MAX_NUMBER_OF_SERVERS 4
@@ -106,6 +116,9 @@ private:
 	static WebServer *findServer(espconn *conn);
     WebRequest *findRequest(espconn *conn);
 };
+
+//Returns true if a string begins with a given substring
+bool beginsWith(char *str, const char *search);
 
 #endif
 
