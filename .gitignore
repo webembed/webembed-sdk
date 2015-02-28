@@ -29,3 +29,5 @@
 
 # ESP8266 images
 *.bin
+
+Thumbs.db

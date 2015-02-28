@@ -13,8 +13,9 @@
 #include "WiFi.h"
 #include "WebServer.h"
 #include "ESPAPI.h"
+#include "flashfs.h"
 
-#define DELAY 1000 /* milliseconds */
+#define DELAY 3000 /* milliseconds */
 
 // =============================================================================================
 // C includes and declarations
@@ -114,6 +115,54 @@ int ICACHE_FLASH_ATTR CGISet(WebRequest *req, const void *arg) {
 	return CGI_DONE;
 }
 
+struct FlashCGIData {
+	FlashFile file;
+	uint32 pos;
+};
+
+char pagebuffer[2048];
+int ICACHE_FLASH_ATTR FlashCGI(WebRequest *req, const void *arg) {
+	FlashCGIData *data;
+	if(req->handlerData == NULL) {
+
+		data = new FlashCGIData();
+		req->handlerData = data;
+		data->pos = 0;
+		if(!FindFile(req->url+1,&(data->file))) {
+			if(req->url[os_strlen(req->url)-1] == '/') {
+				char newUrl[150];
+				os_strncpy(newUrl,req->url,130);
+				os_strcat(newUrl,"index.html");
+				if(!FindFile(newUrl+1,&(data->file))) {
+					return CGI_ERROR_NOTFOUND;
+				}
+			} else {
+				return CGI_ERROR_NOTFOUND;
+			}
+		}
+		req->sendData("HTTP/1.0 200 OK\r\n\r\n");
+		return CGI_MORE_DATA;
+	} else {
+		data = (FlashCGIData *)req->handlerData;
+	}
+
+	if((data->pos + 2048) <= data->file.fileLength) {
+		ReadFromFile(&(data->file),data->pos,2048,pagebuffer);
+		data->pos += 2048;
+		req->fastSend(pagebuffer,2048);
+		os_printf("Sent max of 2048 bytes, pos=%d\n",data->pos);
+		return CGI_MORE_DATA;
+	} else {
+		uint32 remainingData = data->file.fileLength - data->pos;
+		ReadFromFile(&(data->file),data->pos,PadTo4ByteAligned(remainingData),pagebuffer);
+		data->pos += remainingData;
+		req->fastSend(pagebuffer,remainingData);
+		os_printf("Sent %d bytes, pos=%d\n",remainingData, data->pos);
+		delete data;
+		return CGI_DONE;
+	}
+}
+
 // =============================================================================================
 // User code
 // =============================================================================================
@@ -157,6 +206,8 @@ PageHandler p = {"/",CGITest,NULL};
 PageHandler pinc = {"/up",CGISet,NULL};
 PageHandler pdec = {"/down",CGISet,NULL};
 
+PageHandler f = {"*",FlashCGI,NULL};
+
 extern "C" void user_init(void)
 {
 	do_global_ctors();
@@ -184,11 +235,19 @@ extern "C" void user_init(void)
 
 
 	EnterStationMode();
-	//SetWiFiStationConfig("ASUS","XXXXXXXX");
+	//SetWiFiStationConfig("ASUS","XXXXXX");
 	EnableAutoConnect();
-	server.pages.push_back(p);
-	server.pages.push_back(pinc);
-	server.pages.push_back(pdec);
+	FlashFile file;
+	if(GetFirstFile(&file,0x20000)) {
+		do {
+			os_printf("File: %s, size: %x\n",file.name,file.fileLength);
+		} while(GetNextFile(&file));
+
+	} else {
+		os_printf("Failed to init flashfs\n");
+	}
+
+	server.pages.push_back(f);
 
 
 	server.begin(80);

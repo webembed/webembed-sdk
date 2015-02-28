@@ -59,6 +59,8 @@ public:
 	WebServer *server;
 	CGIFunction handler;
 	const void *handlerArg;
+	//Data for the handler to use
+	void *handlerData;
 
 	char *url;
 
@@ -81,6 +83,10 @@ public:
 	//Add data to send buffer. Returns false on failure
 	bool sendData(const char * buffer, int len);
 	bool sendData(const char * str);
+
+	//Fast send, avoids memcpy overhead but can only be used once per CGI call
+	void fastSend(const char *buffer, int len);
+
 	//Flush send buffer
 	void flushBuffer();
 	int lastStatus;

@@ -18,7 +18,7 @@ SDK_BASE	?= c:/Espressif/ESP8266_SDK
 # esptool path and port
 SDK_TOOLS	?= c:/Espressif/utils
 ESPTOOL		?= $(SDK_TOOLS)/esptool.exe
-ESPPORT		?= COM5
+ESPPORT		?= COM8
 
 # BOOT = none
 # BOOT = old - boot_v1.1
@@ -297,7 +297,7 @@ endif
 
 flash: all
 ifeq ($(app), 0) 
-	$(ESPTOOL) -p $(ESPPORT) -b 256000 write_flash 0x00000 firmware/eagle.flash.bin 0x40000 firmware/eagle.irom0text.bin
+	$(ESPTOOL) -p $(ESPPORT) -b 115200 write_flash 0x00000 firmware/eagle.flash.bin 0x20000 filesystem.bin 0x40000 firmware/eagle.irom0text.bin
 else
 ifeq ($(boot), none)
 	$(ESPTOOL) -p $(ESPPORT) -b 256000 write_flash 0x00000 firmware/eagle.flash.bin 0x40000 firmware/eagle.irom0text.bin

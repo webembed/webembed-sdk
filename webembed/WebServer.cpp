@@ -19,6 +19,7 @@ ICACHE_FLASH_ATTR WebRequest::WebRequest() {
 	lastStatus = CGI_ERROR_NOTFOUND;
     receivingHeader = true;
     toDelete = false;
+    handlerData = NULL;
 }
 
 bool ICACHE_FLASH_ATTR WebRequest::sendData(const char * str) {
@@ -39,11 +40,19 @@ void ICACHE_FLASH_ATTR WebRequest::flushBuffer() {
 	}
 }
 
+void ICACHE_FLASH_ATTR WebRequest::fastSend(const char *buffer, int len) {
+	if(len > 0) {
+		espconn_sent(conn,(uint8_t*)buffer,len);
+	}
+}
+
+
 void ICACHE_FLASH_ATTR WebRequest::end() {
 	if(postData != NULL) delete[] postData;
 	postData = NULL;
 	handler = NULL;
 	conn = NULL;
+	handlerData = NULL;
 }
 
 void ICACHE_FLASH_ATTR WebRequest::beginResponse() {
@@ -52,7 +61,7 @@ void ICACHE_FLASH_ATTR WebRequest::beginResponse() {
 		if(os_strcmp(server->pages[i].page, url)==0) {
 			match = true;
 		} else if(server->pages[i].page[os_strlen(server->pages[i].page)-1] == '*') {
-			if(os_strncmp(server->pages[i].page, url, os_strlen(server->pages[i].page))==0) {
+			if(os_strncmp(server->pages[i].page, url, os_strlen(server->pages[i].page) - 1)==0) {
 				match = true;
 			}
 		}
@@ -180,6 +189,7 @@ void ICACHE_FLASH_ATTR WebServer::connectCallback(void *arg) {
 	server->currentRequests[conn_slot].postDataLength = 0;
 	server->currentRequests[conn_slot].receivingHeader = true;
 	server->currentRequests[conn_slot].toDelete = false;
+	server->currentRequests[conn_slot].handlerData = NULL;
 
 	server->currentRequests[conn_slot].lastStatus = CGI_ERROR_NOTFOUND;
 
